@@ -1,10 +1,11 @@
 # 06 desktop interaction prototypes
 
-Three layouts share one local scene and state, selected in the top bar:
+Three layouts share one local scene and state, selected in the top bar. The second
+design pass uses a full scene with edge-aligned controls instead of a card grid:
 
-- 车辆空间: large interactive vehicle, fuel and map companions.
-- 旅途桌面: large map with compact vehicle and fuel panels.
-- 驾驶座舱: fixed fuel / vehicle / map columns and larger control targets.
+- 全景 · 车辆: wide vehicle scene, corner fuel instruments and edge controls.
+- 漫游 · 地图: full-canvas map, floating vehicle and compact trip information.
+- 精密 · 座舱: warm light instrument layout, fine dividers and fixed control area.
 
 All three support light/dark UI, orbit/zoom, four vehicle control hotspots,
 synthetic rain intensity, fuel detail, an optional online OSM basemap, and rotary

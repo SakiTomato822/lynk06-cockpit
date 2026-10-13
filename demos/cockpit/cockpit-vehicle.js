@@ -36,7 +36,7 @@ async function boot(){
  function setZoom(value){targetZoom=Math.max(minZoom(),Math.min(1.4,value));}
  function cameraPose(){const a=angle*Math.PI/180,p=elevation*Math.PI/180,distance=radius*zoom/Math.cos(defaultElevation*Math.PI/180),horizontal=distance*Math.cos(p);camera.setPosition(Math.sin(a)*horizontal,lookY+distance*Math.sin(p),Math.cos(a)*horizontal);camera.lookAt(0,lookY,0);host.dataset.elevation=elevation.toFixed(2);host.dataset.zoom=zoom.toFixed(3);app.renderNextFrame=true;}
  function setAngle(value){target=Math.max(-135,Math.min(135,value));slider.value=target;document.querySelector('#anglevalue').textContent=Math.round(target)+'°';}
- function resize(){const r=host.getBoundingClientRect();app.resizeCanvas(r.width,r.height);radius=r.width/r.height<1.25?7.5:6.25;setZoom(targetZoom);zoom=Math.max(minZoom(),zoom);cameraPose();}
+ function resize(){const r=host.getBoundingClientRect();app.resizeCanvas(r.width,r.height);const layout=document.body.dataset.layout;radius=r.width/r.height<1.1?7.1:layout==='space'?4.95:layout==='journey'?5.6:5.3;setZoom(targetZoom);zoom=Math.max(minZoom(),zoom);cameraPose();}
  new ResizeObserver(resize).observe(host);slider.oninput=()=>setAngle(Number(slider.value));const home=document.querySelector('#home');home.onclick=()=>{setAngle(-36);targetElevation=defaultElevation;setZoom(1);};
  for(const [label,factor] of [['放大',.88],['缩小',1/.88]]){const button=document.createElement('button');button.className='view';button.textContent=label;button.onclick=()=>setZoom(targetZoom*factor);home.before(button);}
  function pinchDistance(){const [a,b]=[...pointers.values()];return Math.hypot(a.x-b.x,a.y-b.y);}

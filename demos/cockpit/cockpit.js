@@ -1,6 +1,6 @@
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
 const state={layout:'space',theme:'dark',lights:false,windows:false,roof:false,trunk:false,rain:0,temp:23};
-const directions={space:['车辆空间','车模是主角，常用功能一步触达。','随心，出发。'],journey:['旅途桌面','地图始终可见，车辆与油耗在右侧陪伴。','一路，从容。'],drive:['驾驶座舱','固定功能分区，大触点与旋钮焦点优先。','掌控，在手。']};
+const directions={space:['全景 · 车辆','宽幅车模、克制的信息层级，控制沿边缘展开。','06'],journey:['漫游 · 地图','地图铺满桌面，车辆与行程数据悬浮于其上。','06'],drive:['精密 · 座舱','浅色仪表布局，细分隔线与固定旋钮操作区。','LYNK 06']};
 let toastTimer,focusIndex=-1,mapEnabled=false,mapExpanded=false;
 function toast(message){$('#toast').textContent=message;$('#toast').classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('#toast').classList.remove('show'),2600);}
 function changeLayout(layout){state.layout=layout;document.body.dataset.layout=layout;const [title,copy,greeting]=directions[layout];$('#direction-title').textContent=title;$('#direction-copy').textContent=copy;$('.vehicle-heading h1').textContent=greeting;$$('.workbench nav button').forEach(b=>{b.classList.toggle('chosen',b.dataset.layout===layout);b.setAttribute('aria-pressed',String(b.dataset.layout===layout));});focusIndex=-1;$$('.knob-focus').forEach(b=>b.classList.remove('knob-focus'));requestAnimationFrame(()=>{if(mapEnabled)renderMap();});}
