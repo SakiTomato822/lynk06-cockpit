@@ -6,4 +6,5 @@ body[data-layout=drive] .desktop{grid-template-columns:.9fr 1.45fr 1fr;grid-temp
 @media(min-width:851px) and (max-width:1250px){.cockpit{min-height:740px}}
 .map.expanded{position:absolute;inset:63px 24px 87px;z-index:10}.map.expanded .map-caption h2{font-size:23px}.map.expanded .map-caption{padding:24px}.map.expanded .map-caption button{display:block!important}.map.expanded .map-placeholder{font-size:30px;top:35%}
 .cockpit{width:calc(100% - 32px)}.panel{min-width:0;min-height:0}.scene canvas{max-width:100%}.desktop{min-width:0}
+.energy{display:flex;flex-direction:column}.energy>.section-title,.energy>.energy-main,.energy>.energy-stats,.energy>.chart-labels{flex-shrink:0}.energy>.fuel-chart{display:block;flex:1;min-height:12px;max-height:90px}.energy>.chart-labels{margin-top:4px}
 @media(prefers-reduced-motion:reduce){*{transition:none!important}}
