@@ -36,6 +36,7 @@ class DesktopDemoActivity : AppCompatActivity() {
     private var demoSpeed = 0
     private var demoAirflow = 3
     private var vehicleDestroyed = false
+    private var controlsPopup: PopupWindow? = null
     private lateinit var amapNavigation: AmapNavigationWidgetBridge
     private val runtimeCarPermissions = arrayOf(
         "android.car.permission.CAR_ENERGY",
@@ -234,13 +235,26 @@ class DesktopDemoActivity : AppCompatActivity() {
         text=label; textSize=18f; isAllCaps=false; setOnClickListener { block() }
     }
     private fun popup(content: View, action: String) {
-        val popup=PopupWindow(content, minOf(dp(620),resources.displayMetrics.widthPixels-dp(40)), -2, true).apply {
+        controlsPopup?.dismiss()
+        val margin=dp(20)
+        val popupWidth=minOf(dp(620),(ui.width-margin*2).coerceAtLeast(1))
+        content.measure(View.MeasureSpec.makeMeasureSpec(popupWidth,View.MeasureSpec.EXACTLY),
+            View.MeasureSpec.makeMeasureSpec((ui.height-margin*2).coerceAtLeast(1),View.MeasureSpec.AT_MOST))
+        val popupHeight=content.measuredHeight
+        val popup=PopupWindow(content, popupWidth, popupHeight, true).apply {
             elevation=dp(22).toFloat(); setBackgroundDrawable(android.graphics.drawable.ColorDrawable(Color.TRANSPARENT)); isOutsideTouchable=true
         }
+        controlsPopup=popup
+        popup.setOnDismissListener {if(controlsPopup===popup)controlsPopup=null}
         val anchor=ui.actionRect(action)
+        val location=IntArray(2);ui.getLocationInWindow(location)
+        val left=((anchor?.centerX()?:ui.width/2f)-popupWidth/2).roundToInt()
+            .coerceIn(margin,(ui.width-popupWidth-margin).coerceAtLeast(margin))
+        val above=(anchor?.top?:ui.height/2f).roundToInt()-popupHeight-dp(12)
+        val desiredTop=if(above>=margin)above else (anchor?.bottom?:margin.toFloat()).roundToInt()+dp(12)
+        val top=desiredTop.coerceIn(margin,(ui.height-popupHeight-margin).coerceAtLeast(margin))
         popup.showAtLocation(ui, Gravity.TOP or Gravity.START,
-            (anchor?.centerX()?.minus(dp(300)) ?: dp(40).toFloat()).roundToInt().coerceAtLeast(dp(20)),
-            dp(130).coerceAtMost(resources.displayMetrics.heightPixels/4))
+            location[0]+left,location[1]+top)
     }
     private fun sliderRow(container: LinearLayout, title: String, initial: Int, maximum: Int, unit: String, update: (Int)->Unit) {
         val row=LinearLayout(this).apply { orientation=LinearLayout.HORIZONTAL; gravity=Gravity.CENTER_VERTICAL }
@@ -304,7 +318,7 @@ class DesktopDemoActivity : AppCompatActivity() {
         return super.dispatchGenericMotionEvent(event)
     }
     override fun onResume(){super.onResume();if(::vehicle.isInitialized&&!vehicleDestroyed)vehicle.onResume()}
-    override fun onPause(){if(::vehicle.isInitialized&&!vehicleDestroyed)vehicle.onPause();super.onPause()}
+    override fun onPause(){controlsPopup?.dismiss();if(::vehicle.isInitialized&&!vehicleDestroyed)vehicle.onPause();super.onPause()}
     private fun destroyVehicle() {
         if (!::vehicle.isInitialized || vehicleDestroyed) return
         vehicleDestroyed = true

@@ -4,6 +4,8 @@ import android.content.Context
 import android.graphics.*
 import android.view.MotionEvent
 import android.view.View
+import android.view.ViewConfiguration
+import android.view.HapticFeedbackConstants
 import androidx.core.content.res.ResourcesCompat
 import org.json.JSONObject
 import java.text.SimpleDateFormat
@@ -45,6 +47,17 @@ internal class DesktopCockpitView(context: Context, private val action:(String)-
     private var ox=0f
     private var oy=0f
     private var pressed:String?=null
+    private var touchStartX=0f
+    private var touchStartY=0f
+    private var longPressHandled=false
+    private val touchSlop=ViewConfiguration.get(context).scaledTouchSlop
+    private val openWindowControls=Runnable {
+        if(pressed?.let(::normalizedAction)=="windows") {
+            longPressHandled=true
+            performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
+            action("windows")
+        }
+    }
     private var screenHotspots:Map<String,Pair<Float,Float>> = emptyMap()
     private val textColor get()=if(night)Color.rgb(237,244,249) else Color.rgb(36,57,61)
     private val muted get()=if(night)Color.rgb(149,172,189) else Color.rgb(103,126,132)
@@ -76,7 +89,7 @@ internal class DesktopCockpitView(context: Context, private val action:(String)-
             key to ((.18f+.82f*p.optDouble("x").toFloat())*width to (.02f+.85f*p.optDouble("y").toFloat())*height)
         }.toMap();invalidate()
     }
-    fun actionRect(id:String):RectF?=buttons[id]?.let {RectF(ox+it.left*scale,oy+it.top*scale,ox+it.right*scale,oy+it.bottom*scale)}
+    fun actionRect(id:String):RectF?=(pressed?.takeIf {normalizedAction(it)==id}?.let(buttons::get)?:buttons[id])?.let {RectF(ox+it.left*scale,oy+it.top*scale,ox+it.right*scale,oy+it.bottom*scale)}
     fun moveFocus(delta:Int) {
         val count=buttons.size
         if(count==0)return
@@ -241,11 +254,19 @@ internal class DesktopCockpitView(context: Context, private val action:(String)-
     }
     override fun onTouchEvent(event:MotionEvent):Boolean {
         val x=(event.x-ox)/scale;val y=(event.y-oy)/scale
-        if(event.actionMasked==MotionEvent.ACTION_DOWN){pressed=buttons.entries.lastOrNull {it.value.contains(x,y)}?.key;invalidate();return pressed!=null}
-        if(event.actionMasked==MotionEvent.ACTION_UP){val id=pressed;pressed=null;invalidate();if(id!=null&&buttons[id]?.contains(x,y)==true){focusIndex=buttons.keys.indexOf(id);if(id!="airflow")airflowAdjusting=false;performClick();action(normalizedAction(id))};return id!=null}
-        if(event.actionMasked==MotionEvent.ACTION_CANCEL){pressed=null;invalidate()}
+        if(event.actionMasked==MotionEvent.ACTION_DOWN){
+            removeCallbacks(openWindowControls)
+            pressed=buttons.entries.lastOrNull {it.value.contains(x,y)}?.key
+            touchStartX=event.x;touchStartY=event.y;longPressHandled=false
+            if(pressed?.let(::normalizedAction)=="windows")postDelayed(openWindowControls,ViewConfiguration.getLongPressTimeout().toLong())
+            invalidate();return pressed!=null
+        }
+        if(event.actionMasked==MotionEvent.ACTION_MOVE&&hypot(event.x-touchStartX,event.y-touchStartY)>touchSlop)removeCallbacks(openWindowControls)
+        if(event.actionMasked==MotionEvent.ACTION_UP){removeCallbacks(openWindowControls);val id=pressed;pressed=null;invalidate();if(!longPressHandled&&id!=null&&buttons[id]?.contains(x,y)==true){focusIndex=buttons.keys.indexOf(id);if(id!="airflow")airflowAdjusting=false;performClick();action(normalizedAction(id))};return id!=null}
+        if(event.actionMasked==MotionEvent.ACTION_CANCEL){removeCallbacks(openWindowControls);pressed=null;invalidate()}
         return pressed!=null
     }
+    override fun onDetachedFromWindow(){removeCallbacks(openWindowControls);super.onDetachedFromWindow()}
     private fun normalizedAction(id:String)=when {id.startsWith("hot-")->id.removePrefix("hot-");id=="amap-dock"->"amap";id=="fuel-energy"->"energy";else->id}
     override fun performClick():Boolean {super.performClick();return true}
 }
