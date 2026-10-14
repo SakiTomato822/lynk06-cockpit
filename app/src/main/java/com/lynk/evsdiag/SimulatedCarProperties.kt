@@ -4,7 +4,7 @@ import android.content.Intent
 
 class SimulatedCarProperties(initialScenario: String = "aggressive") {
     companion object {
-        const val ACTION_UPDATE = "com.lynk.autoenergyfuel.SIMULATE_CAR_PROPERTY"
+        const val ACTION_UPDATE = BuildConfig.APPLICATION_ID + ".SIMULATE_CAR_PROPERTY"
 
         const val DIRECT_RANGE_REMAINING = 291504904
         const val DIRECT_PERF_ODOMETER = 291504644

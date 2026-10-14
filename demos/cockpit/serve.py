@@ -14,7 +14,9 @@ asset_root = args.assets.resolve()
 class Handler(SimpleHTTPRequestHandler):
     def translate_path(self, path):
         relative = unquote(urlsplit(path).path).lstrip('/') or 'cockpit.html'
-        base = asset_root if relative.startswith(('assets/', 'vendor/', 'references/relive/')) else root
+        local = (root / relative).resolve()
+        base = root if local.is_relative_to(root) and local.is_file() else (
+            asset_root if relative.startswith(('assets/', 'vendor/', 'references/relive/')) else root)
         target = (base / relative).resolve()
         if not target.is_relative_to(base):
             return str(root / '__not_found__')

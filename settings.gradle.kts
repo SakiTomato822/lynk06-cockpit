@@ -14,5 +14,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "AutoEnergyFuelMod"
+rootProject.name = "Lynk06Cockpit"
 include(":app")

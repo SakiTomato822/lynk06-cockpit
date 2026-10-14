@@ -8,11 +8,11 @@ android {
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.lynk.autoenergyfuel"
+        applicationId = "com.lynk.cockpit"
         minSdk = 30
         targetSdk = 34
-        versionCode = 23
-        versionName = "0.6.7"
+        versionCode = 1
+        versionName = "0.1.0"
         testInstrumentationRunner = "com.lynk.dvrprobe.RouteSmokeInstrumentation"
     }
 
@@ -26,7 +26,7 @@ android {
         }
         debug {
             isMinifyEnabled = false
-            applicationIdSuffix = ".dhureadonly"
+            applicationIdSuffix = ".debug"
         }
     }
 

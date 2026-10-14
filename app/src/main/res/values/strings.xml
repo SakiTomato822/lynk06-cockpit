@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">能量中心</string>
+    <string name="app_name">06 座舱</string>
     <string name="title">Fuel Energy Space</string>
     <string name="subtitle">Independent package based on the original AutoEnergy read path. Fuel-first layout, electric UI trimmed, and local trend line used when the factory fuel curve is missing.</string>
     <string name="check_root_button">Root Check</string>

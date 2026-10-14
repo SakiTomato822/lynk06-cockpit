@@ -1,59 +1,18 @@
-# 06 desktop interaction prototypes
+# 06 座舱 · 浏览器设计参考
 
-Three layouts share one local scene and state, selected in the top bar. The second
-design pass uses a full scene with edge-aligned controls instead of a card grid:
+Android 是主应用，此目录用于比较全景车辆、漫游地图、精密座舱三种视觉方向。浏览器与 Android 原生 UI 的布局和行为仍在对齐中。
 
-- 全景 · 车辆: wide vehicle scene, corner fuel instruments and edge controls.
-- 漫游 · 地图: full-canvas map, floating vehicle and compact trip information.
-- 精密 · 座舱: warm light instrument layout, fine dividers and fixed control area.
+```sh
+python serve.py --assets /path/to/lynk06_car_demo
+```
 
-All three support light/dark UI, orbit/zoom, four vehicle control hotspots,
-synthetic rain intensity, fuel detail, an optional online OSM basemap, and rotary
-focus navigation. This is a browser design demo; no vehicle writes occur.
+打开 http://127.0.0.1:8768/cockpit.html 。`--port` 可指定端口。已有本地工作区时，默认缓存目录为工作区的 `outputs/lynk06_car_demo`。模型、贴图、着色器和引擎来自本地资源缓存，不随此次仓库拆分新增公开发布。场景背景和界面代码已包含在仓库中。
 
-## Run
+- 拖动车模环绕/俯仰，滚轮或双指缩放；视角与最近距离受限。
+- 大灯材质及地面光束、天窗和尾门动画为模拟效果。
+- 车窗长按或右键打开四窗独立开度浮层。
+- 底栏温度、1–7 档风量和旋钮焦点为演示输入，不发送车辆指令。
+- 环境面板支持晴、多云、雨、雾、雪及模拟车速；真实传感器和天气源未接入。
+- 油耗数字、曲线和路线为演示数据，OSM 底图需主动加载。
 
-From this directory, run `python serve.py`, then open
-http://127.0.0.1:8768/cockpit.html . You can pass `--port 8767` or `--assets PATH`.
-The default assets path points to the existing local `outputs/lynk06_car_demo`
-cache in this workspace. The original showroom assets and engine are not copied
-into this repository. An independent checkout needs that local asset directory.
-
-## Hardware and integration boundary
-
-`window.CockpitInput.rotate(delta)`, `.press()`, and `.back()` are the proposed
-input adapter boundary. Arrow keys, Enter, Esc and the demo knob controls exercise
-it. No Bluetooth/USB HID device has been paired or tested. A real host must map
-device events, debounce them and derive the focus order from the active screen.
-
-Rain intensity currently has four synthetic levels, not millimetres per hour.
-Actual CarAPI availability, sensor calibration, stale-data timeout, hysteresis
-and animation quality tiers remain vehicle integration work. Rain does not
-automatically close windows or trigger other vehicle actions in this prototype.
-
-Control state is simulated. Lamps change material emission, door glass visibility
-changes, and roof/tailgate transforms show approximate open/close feedback.
-Production needs calibrated part pivots and confirmed vehicle state, pending/
-failure feedback and speed/gear interlocks. Hotspots currently lack occlusion
-filtering and can remain visible from the opposite side of the vehicle.
-
-The map route and fuel figures are illustrative. The route is a layout overlay,
-not a recorded GPS route or turn-by-turn route. OSM tiles are requested only after
-consent, with browser caching and attribution; original raster styling stays
-light even when the surrounding UI is dark. No tile prefetch or offline download.
-Fuel history and live CarAPI values have not yet been bridged into this demo.
-
-Vehicle rendering is requested when changing view/material/parts; idle continuous
-draws are disabled. The rain layer is bounded to 75 strokes at about 30fps and
-pauses when hidden. This does not establish performance on DHU615G; the official
-model still needs geometry/material optimisation and real hardware measurement.
-
-## Validation
-
-Checked all three layouts at a 1920x1080 browser viewport, plus the default narrow
-desktop viewport. Checked theme switching, four control actions, roof/tailgate
-feedback, rain, rotary focus, fuel dialog, and real OSM tile loading. No browser
-console errors during those checks. JavaScript syntax checks passed.
-
-This work does not change the Android APK. Existing range-data and Android theme
-integration tasks remain separate from choosing the desktop design direction.
+输入边界为 `window.CockpitInput.rotate(delta)`、`.press()`、`.back()`。灯光、玻璃移动、天窗/尾门支点和热点遮挡仍需继续校准；尚未实测真实车机性能。Android 的原厂高德订阅位于 `AmapNavigationWidgetBridge.kt`，未桥接进此浏览器页面。

@@ -24,7 +24,7 @@ internal class OsmTileCache(context: Context) {
         val connection = URL("https://tile.openstreetmap.org/$z/$x/$y.png").openConnection() as HttpURLConnection
         try {
             connection.connectTimeout = 6000; connection.readTimeout = 6000
-            connection.setRequestProperty("User-Agent", "AutoEnergyFuel/${BuildConfig.VERSION_NAME} (+https://github.com/SakiTomato822/autoenergy-fuel-mod)")
+            connection.setRequestProperty("User-Agent", "Lynk06Cockpit/${BuildConfig.VERSION_NAME} (+https://github.com/SakiTomato822/lynk06-cockpit)")
             if (file.exists()) {
                 headers.getProperty("etag")?.let { connection.setRequestProperty("If-None-Match", it) }
                 headers.getProperty("modified")?.let { connection.setRequestProperty("If-Modified-Since", it) }

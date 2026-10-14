@@ -11,3 +11,12 @@ captures/
 .cxx/
 __pycache__/
 *.py[cod]
+
+# Local vehicle asset cache; import with tools/prepare_cockpit_assets.py.
+app/src/main/assets/cockpit/assets/relive/
+app/src/main/assets/cockpit/references/
+app/src/main/assets/cockpit/vendor/
+demos/cockpit/assets/relive/
+demos/cockpit/references/
+demos/cockpit/vendor/
+*.bundle
