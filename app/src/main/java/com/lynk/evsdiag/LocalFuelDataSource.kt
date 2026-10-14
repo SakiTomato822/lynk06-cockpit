@@ -28,6 +28,16 @@ object LocalFuelDataSource {
                 while (cursor.moveToNext() && candidates.size < 10) candidates += Uri.withAppendedPath(MediaStore.Downloads.EXTERNAL_CONTENT_URI, cursor.getLong(0).toString()).toString()
             }
         }.onFailure { AppLog.w("DATA", "generation query failed", it) }
+        // After uninstall/reinstall, the old app's URI preferences are gone. Some
+        // Flyme builds omit RELATIVE_PATH from Downloads queries, so retain a
+        // filename-based fallback for the public history generations.
+        runCatching {
+            this.context.contentResolver.query(MediaStore.Downloads.EXTERNAL_CONTENT_URI,
+                arrayOf(MediaStore.Downloads._ID), "${MediaStore.Downloads.DISPLAY_NAME} LIKE ? AND ${MediaStore.Downloads.IS_PENDING}=0",
+                arrayOf("history-%.json"), "${MediaStore.Downloads._ID} DESC")?.use { cursor ->
+                while (cursor.moveToNext() && candidates.size < 20) candidates += Uri.withAppendedPath(MediaStore.Downloads.EXTERNAL_CONTENT_URI, cursor.getLong(0).toString()).toString()
+            }
+        }.onFailure { AppLog.w("DATA", "filename generation query failed", it) }
         for (key in listOf("latest_uri", "previous_uri")) locations.getString(key, null)?.let { candidates += it }
         for (uri in candidates.distinct()) {
             runCatching { FuelHistoryJson.decode(readText(Uri.parse(uri))) }.onSuccess {
@@ -90,6 +100,21 @@ object LocalFuelDataSource {
         AppLog.i("DATA", "existing JSON selected points=${selected.points.size}")
         return selected.points.size
     }
+
+    /** Export a validated snapshot to a user-selected document, independent of app storage. */
+    @Synchronized fun exportTo(context: Context, uri: Uri): Int {
+        this.context = context.applicationContext
+        val current = read(context)
+        val json = FuelHistoryJson.encode(current)
+        context.contentResolver.openOutputStream(uri, "w")?.use {
+            it.write(json.toByteArray(Charsets.UTF_8))
+        } ?: error("Cannot write exported JSON data file")
+        AppLog.i("DATA", "JSON exported points=${current.points.size} uri=$uri")
+        return current.points.size
+    }
+
+    /** Import a user-selected JSON snapshot and publish it as the active shared generation. */
+    @Synchronized fun importFrom(context: Context, uri: Uri): Int = selectExisting(context, uri)
 
     private fun readText(uri: Uri): String = context.contentResolver.openInputStream(uri)?.use {
         val output = java.io.ByteArrayOutputStream()

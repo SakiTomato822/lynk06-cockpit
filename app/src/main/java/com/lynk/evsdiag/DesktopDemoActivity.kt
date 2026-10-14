@@ -7,7 +7,9 @@ import android.content.pm.PackageManager
 import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
+import android.os.Build
 import android.os.SystemClock
+import android.content.res.ColorStateList
 import android.view.*
 import android.webkit.*
 import android.widget.*
@@ -23,6 +25,11 @@ import kotlin.math.roundToInt
 
 /** Native Android UI; a restricted local WebGL surface renders only the vehicle. */
 class DesktopDemoActivity : AppCompatActivity() {
+    private companion object {
+        const val UI_PREFERENCES = "cockpit_ui"
+        const val NIGHT_MODE_PREFERENCE = "night_mode"
+    }
+
     private lateinit var vehicle: WebView
     private lateinit var ui: DesktopCockpitView
     private var ready = false
@@ -126,10 +133,13 @@ class DesktopDemoActivity : AppCompatActivity() {
             }
         }
         ui = DesktopCockpitView(this) { action -> handle(action) }
+        ui.night = getSharedPreferences(UI_PREFERENCES, MODE_PRIVATE)
+            .getBoolean(NIGHT_MODE_PREFERENCE, true)
         root.addView(ui.backgroundView, FrameLayout.LayoutParams(-1, -1))
         root.addView(vehicle, FrameLayout.LayoutParams(-1, -1))
         root.addView(ui, FrameLayout.LayoutParams(-1, -1))
         setContentView(root)
+        applySystemTheme()
         amapNavigation = AmapNavigationWidgetBridge(applicationContext).also { it.start() }
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -193,13 +203,37 @@ class DesktopDemoActivity : AppCompatActivity() {
         command("CarScene.setTheme('${if (ui.night) "dark" else "light"}')")
         command("CarScene.environment('${decision.weather.scene}',$demoSpeed)")
     }
+
+    private fun applySystemTheme() {
+        // Keep the app between the system bars, but make both bars follow the selected
+        // cockpit palette so the system icons remain legible in either mode.
+        WindowCompat.setDecorFitsSystemWindows(window, true)
+        val controller = WindowCompat.getInsetsController(window, window.decorView)
+        val systemBarColor = if (ui.night) Color.rgb(9, 17, 26) else Color.rgb(231, 237, 235)
+        window.statusBarColor = systemBarColor
+        window.navigationBarColor = systemBarColor
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            window.isStatusBarContrastEnforced = false
+            window.isNavigationBarContrastEnforced = false
+        }
+        controller.isAppearanceLightStatusBars = !ui.night
+        controller.isAppearanceLightNavigationBars = !ui.night
+    }
     private fun handle(action: String) {
         if(!ready&&action in listOf("lights","trunk","windows","roof","reset")) {
             Toast.makeText(this,"车模仍在准备中",Toast.LENGTH_SHORT).show();return
         }
         when (action) {
             "back" -> finish()
-            "theme" -> { ui.night = !ui.night; applyScene() }
+            "theme" -> {
+                ui.night = !ui.night
+                getSharedPreferences(UI_PREFERENCES, MODE_PRIVATE).edit()
+                    .putBoolean(NIGHT_MODE_PREFERENCE, ui.night)
+                    .apply()
+                ui.invalidate()
+                applySystemTheme()
+                applyScene()
+            }
             "environment" -> environmentPanel()
             // This control is intentionally local UI state. It never calls the car or WebGL bridge.
             "airflow" -> { ui.airflowAdjusting = !ui.airflowAdjusting; ui.invalidate() }
@@ -232,7 +266,19 @@ class DesktopDemoActivity : AppCompatActivity() {
         text=value; textSize=size; setTextColor(if(ui.night) Color.rgb(230,239,244) else Color.rgb(42,63,64))
     }
     private fun button(label: String, block: () -> Unit) = Button(this).apply {
-        text=label; textSize=18f; isAllCaps=false; setOnClickListener { block() }
+        val foreground = if (ui.night) Color.rgb(230, 239, 244) else Color.rgb(42, 63, 64)
+        val surface = if (ui.night) Color.rgb(47, 64, 78) else Color.rgb(224, 235, 233)
+        text = label
+        textSize = 18f
+        isAllCaps = false
+        minHeight = dp(52)
+        setPadding(dp(14), dp(8), dp(14), dp(8))
+        setTextColor(foreground)
+        background = GradientDrawable().apply {
+            setColor(surface)
+            cornerRadius = dp(13).toFloat()
+        }
+        setOnClickListener { block() }
     }
     private fun popup(content: View, action: String) {
         controlsPopup?.dismiss()
@@ -260,10 +306,20 @@ class DesktopDemoActivity : AppCompatActivity() {
         val row=LinearLayout(this).apply { orientation=LinearLayout.HORIZONTAL; gravity=Gravity.CENTER_VERTICAL }
         val value=text("$title  $initial$unit", 20f)
         row.addView(value, LinearLayout.LayoutParams(dp(220),-2))
-        row.addView(SeekBar(this).apply { max=maximum; progress=initial; setOnSeekBarChangeListener(object:SeekBar.OnSeekBarChangeListener {
+        row.addView(SeekBar(this).apply {
+            max = maximum
+            progress = initial
+            val tint = ColorStateList.valueOf(if (ui.night) Color.rgb(134, 202, 232) else Color.rgb(48, 117, 136))
+            progressTintList = tint
+            progressBackgroundTintList = ColorStateList.valueOf(
+                if (ui.night) Color.rgb(75, 91, 103) else Color.rgb(187, 204, 202),
+            )
+            thumbTintList = tint
+            setOnSeekBarChangeListener(object:SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(bar:SeekBar?,progress:Int,fromUser:Boolean){value.text="$title  $progress$unit";if(fromUser)update(progress)}
             override fun onStartTrackingTouch(bar:SeekBar?){};override fun onStopTrackingTouch(bar:SeekBar?){}
-        }) }, LinearLayout.LayoutParams(0,dp(58),1f))
+            })
+        }, LinearLayout.LayoutParams(0,dp(58),1f))
         container.addView(row)
     }
     private fun windowPanel() {
@@ -285,7 +341,18 @@ class DesktopDemoActivity : AppCompatActivity() {
         val weatherRow=LinearLayout(this).apply { orientation=LinearLayout.HORIZONTAL }
         DesktopEnvironment.Weather.entries.forEach { weather -> weatherRow.addView(button(weather.label) { forecast=weather;applyScene() },LinearLayout.LayoutParams(0,-2,1f)) }
         content.addView(weatherRow)
-        content.addView(Switch(this).apply { text="雨量传感器：检测到雨（覆盖天气）";textSize=19f;isChecked=rainActive;setTextColor(if(ui.night)Color.WHITE else Color.DKGRAY);setOnCheckedChangeListener { _,checked ->rainActive=checked;applyScene()} })
+        content.addView(Switch(this).apply {
+            text = "雨量传感器：检测到雨（覆盖天气）"
+            textSize = 19f
+            isChecked = rainActive
+            setTextColor(if (ui.night) Color.WHITE else Color.DKGRAY)
+            val tint = ColorStateList.valueOf(if (ui.night) Color.rgb(134, 202, 232) else Color.rgb(48, 117, 136))
+            thumbTintList = tint
+            trackTintList = ColorStateList.valueOf(
+                if (ui.night) Color.rgb(81, 101, 116) else Color.rgb(177, 197, 196),
+            )
+            setOnCheckedChangeListener { _,checked ->rainActive=checked;applyScene()}
+        })
         sliderRow(content,"行驶模拟",demoSpeed,100," km/h") { demoSpeed=it;applyScene() }
         content.addView(button("完成") {dialog.dismiss()})
         dialog.setContentView(content);dialog.window?.setBackgroundDrawableResource(android.R.color.transparent);dialog.show()
@@ -317,7 +384,11 @@ class DesktopDemoActivity : AppCompatActivity() {
         }
         return super.dispatchGenericMotionEvent(event)
     }
-    override fun onResume(){super.onResume();if(::vehicle.isInitialized&&!vehicleDestroyed)vehicle.onResume()}
+    override fun onResume(){
+        super.onResume()
+        if (::ui.isInitialized) applySystemTheme()
+        if(::vehicle.isInitialized&&!vehicleDestroyed)vehicle.onResume()
+    }
     override fun onPause(){controlsPopup?.dismiss();if(::vehicle.isInitialized&&!vehicleDestroyed)vehicle.onPause();super.onPause()}
     private fun destroyVehicle() {
         if (!::vehicle.isInitialized || vehicleDestroyed) return

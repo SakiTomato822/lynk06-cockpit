@@ -1,0 +1,219 @@
+/* Readable light theme for the editorial desktop treatment. */
+body[data-theme="light"] {
+  background: #f2f3ef;
+  color: #34464a;
+  --accent: #8c704d;
+  --bg: #e9ece7;
+  --panel: #f7f8f4;
+  --text: #293b3f;
+  --muted: #71817f;
+  --button: #233d4208;
+  --shadow: #273c3d16;
+}
+
+body[data-theme="light"] .wordmark { color: #33494b; }
+body[data-theme="light"] .wordmark span { color: #7d8c88; }
+body[data-theme="light"] .workbench nav button { color: #71817f; }
+body[data-theme="light"] .workbench nav button.chosen {
+  color: #31484a;
+  border-color: #9a7d58;
+}
+body[data-theme="light"] .workbench > button {
+  color: #385255;
+  border-color: #34555430;
+  background: #ffffff70;
+}
+body[data-theme="light"] .cockpit {
+  border-color: #344f5018;
+  box-shadow: 0 24px 70px #3144431a;
+}
+body[data-theme="light"] .systembar { color: #526565; }
+body[data-theme="light"] .systembar small { color: #7a8885; }
+body[data-theme="light"] .online-dot { background: #4b9b83; }
+
+body[data-theme="light"] .vehicle-heading p,
+body[data-theme="light"] .vehicle-heading > span,
+body[data-theme="light"] .space-caption { color: #738580; }
+body[data-theme="light"] .vehicle-heading h1 { color: #34484b; }
+body[data-theme="light"] .vehicle-foot:before { color: #72827f; }
+body[data-theme="light"] .vehicle-foot button { color: #526a69; }
+body[data-theme="light"] .paint-choice button { border-color: #31494b52; }
+
+body[data-theme="light"] .energy-main p { color: #71817b; }
+body[data-theme="light"] .energy-main p small { color: #85928d; }
+body[data-theme="light"] .energy-main strong,
+body[data-theme="light"] .energy-stats b,
+body[data-theme="light"] .fuel-mini b { color: #2e4545; }
+body[data-theme="light"] .energy-main strong > span,
+body[data-theme="light"] .energy-stats b small,
+body[data-theme="light"] .energy-stats span,
+body[data-theme="light"] .fuel-mini small { color: #778783; }
+body[data-theme="light"] .energy .section-title button { color: #6d7f7b; }
+body[data-theme="light"] .fuel-track { background: #526f6a24; }
+
+body[data-theme="light"] .map {
+  background: #e1e9e5;
+  border-color: #35555424;
+}
+body[data-theme="light"] .map-surface { background: #dce7e2; }
+body[data-theme="light"] .map-surface:after {
+  box-shadow: inset 0 -42px 52px #dce7e255;
+}
+body[data-theme="light"] .map-top .eyebrow { color: #687d78; }
+body[data-theme="light"] .map-top button {
+  background: #f7f9f5e8;
+  color: #455e5c;
+  border: 1px solid #49676120;
+}
+body[data-theme="light"] .map-caption {
+  background: #f6f8f4ed;
+  color: #344c4b;
+}
+body[data-theme="light"] .map-caption p,
+body[data-theme="light"] .map-placeholder,
+body[data-theme="light"] .map-placeholder small { color: #71827d; }
+body[data-theme="light"] .map-caption button { color: #526d68; }
+body[data-theme="light"] .route-halo { stroke: #e6eee9; }
+body[data-theme="light"] .route-color { stroke: #4a96a0; }
+body[data-theme="light"] .route-line circle { fill: #92744c; stroke: #f8faf6; }
+
+body[data-theme="light"] .controls { border-color: #3b5b501e; }
+body[data-theme="light"] .controls .section-title .eyebrow,
+body[data-theme="light"] .controls .park { color: #778781; }
+body[data-theme="light"] .control-grid button {
+  color: #435958;
+  border-color: #35534c1e;
+  background: #ffffff58;
+}
+body[data-theme="light"] .control-grid small { color: #7c8b85; }
+body[data-theme="light"] .control-grid button[aria-pressed="true"] {
+  color: #785d3d;
+  background: #b8996a1a;
+  border-color: #98744860;
+}
+
+body[data-theme="light"] .dock {
+  color: #536866;
+  background: #e9eee9df;
+  border-color: #3b57501a;
+}
+body[data-theme="light"] .dock > button,
+body[data-theme="light"] .climate button { color: #5b7471; }
+body[data-theme="light"] .dock #home-desktop { color: #304b49; }
+body[data-theme="light"] .dock > button span,
+body[data-theme="light"] .climate span { color: #788984; }
+body[data-theme="light"] .climate { border-color: #49605b20; }
+body[data-theme="light"] .climate strong,
+body[data-theme="light"] .airflow strong { color: #38504f; }
+body[data-theme="light"] .airflow { border-color: #49605b20; }
+body[data-theme="light"] .airflow .fan-symbol { color: #617b76; }
+body[data-theme="light"] .airflow i {
+  background: linear-gradient(to right, var(--accent) 0 calc(var(--fan-level)*14.285%), #627a7330 calc(var(--fan-level)*14.285%) 100%);
+}
+
+body[data-theme="light"] .demo-title { color: #735d40; }
+body[data-theme="light"] .demo-bar p,
+body[data-theme="light"] .explanation { color: #768681; }
+body[data-theme="light"] .rain-setting,
+body[data-theme="light"] .rotary span { color: #667875; }
+body[data-theme="light"] .rotary button {
+  color: #455e5b;
+  border-color: #49645d35;
+  background: #ffffff83;
+}
+body[data-theme="light"] #toast {
+  color: #344c4b;
+  background: #f6f9f4f2;
+  border-color: #54736a38;
+  box-shadow: 0 8px 28px #293d3d20;
+}
+
+/* A journey map may remain a subdued map canvas, while controls follow the theme. */
+body[data-layout="journey"][data-theme="light"] .cockpit {
+  background: #e4eae6;
+  color: #344947;
+}
+body[data-layout="journey"][data-theme="light"] .systembar {
+  color: #536b67;
+  background: #edf1ecb8;
+}
+body[data-layout="journey"][data-theme="light"] .map { background: #e4ebe6; }
+body[data-layout="journey"][data-theme="light"] .map-surface {
+  background: #dfe9e4;
+}
+body[data-layout="journey"][data-theme="light"] .map-surface:after {
+  background: linear-gradient(90deg, #e9efeba8, transparent 38%, transparent 70%, #e9efeb58),
+    linear-gradient(0deg, #dfe8e3d9, transparent 38%);
+}
+body[data-layout="journey"][data-theme="light"] .map-caption {
+  color: #354e4b;
+  background: #f5f8f3ed;
+  border-color: #49665e24;
+  box-shadow: 0 16px 40px #374e4620;
+}
+body[data-layout="journey"][data-theme="light"] .map-caption .route-symbol,
+body[data-layout="journey"][data-theme="light"] .map-caption button { color: #53736e; }
+body[data-layout="journey"][data-theme="light"] .map-caption p { color: #71827b; }
+body[data-layout="journey"][data-theme="light"] .map-placeholder,
+body[data-layout="journey"][data-theme="light"] .map-placeholder small { color: #708681; }
+body[data-layout="journey"][data-theme="light"] .route-halo { stroke: #f5f8f3; }
+body[data-layout="journey"][data-theme="light"] .route-color { stroke: #9a7c52; }
+body[data-layout="journey"][data-theme="light"] .route-line circle { fill: #4b9694; stroke: #f8faf5; }
+body[data-layout="journey"][data-theme="light"] .energy {
+  color: #304947 !important;
+  background: #f2f6f0e8;
+  border: 1px solid #4c68601c;
+  border-radius: 13px;
+  box-shadow: 0 12px 34px #2e49431c;
+  padding: 14px 17px !important;
+}
+body[data-layout="journey"][data-theme="light"] .energy-main strong,
+body[data-layout="journey"][data-theme="light"] .energy-stats b,
+body[data-layout="journey"][data-theme="light"] .fuel-mini b { color: #304947 !important; }
+body[data-layout="journey"][data-theme="light"] .energy-main p,
+body[data-layout="journey"][data-theme="light"] .energy .section-title button { color: #667c76; }
+body[data-layout="journey"][data-theme="light"] .energy-stats span { color: #71837c; }
+body[data-layout="journey"][data-theme="light"] .controls {
+  background: #f2f6f0ee;
+  box-shadow: 0 14px 38px #304a441d;
+}
+body[data-layout="journey"][data-theme="light"] .controls .control-grid button > span:not(.control-icon) { color: #405b56; }
+body[data-layout="journey"][data-theme="light"] .controls .control-icon { color: #58736d !important; }
+body[data-layout="journey"][data-theme="light"] .dock {
+  color: #405855;
+  background: #e9efeadf;
+  border-color: #425c551c;
+}
+body[data-layout="journey"][data-theme="light"] .dock > button { color: #617873; }
+body[data-layout="journey"][data-theme="light"] .dock #home-desktop { color: #344d49; }
+body[data-layout="journey"][data-theme="light"] .climate strong { color: #344d49; }
+
+/* One thin-line SVG language across controls, navigation, music and climate. */
+.dock > button svg {
+  display: block;
+  width: 19px;
+  height: 19px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.45;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.airflow .fan-symbol {
+  display: block !important;
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.35;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.dock #music { min-width: 132px; }
+.dock #music svg { flex: 0 0 19px; }
+.control-icon svg { stroke-width: 1.45; }
+
+@media (prefers-reduced-motion: reduce) {
+  .dock > button svg,
+  .airflow .fan-symbol { transition: none; }
+}

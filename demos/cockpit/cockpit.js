@@ -44,7 +44,7 @@ function setTemp(delta){state.temp=Math.max(16,Math.min(30,state.temp+delta));$(
 $('#fan-down').onclick=()=>setFan(-1);$('#fan-up').onclick=()=>setFan(1);
 function setFan(delta){state.fan=Math.max(1,Math.min(7,state.fan+delta));$('#fan-level').textContent=state.fan;$('#fan-bars').style.setProperty('--fan-level',state.fan);$('#fan-bars').setAttribute('aria-label',`风量 ${state.fan} 档`);toast(`风量 ${state.fan} 档 · 演示，不下发控车`);}
 setFan(0);
-$('#music').onclick=()=>{const b=$('#music');const paused=b.dataset.paused!=='true';b.dataset.paused=String(paused);b.innerHTML=(paused?'▷':'Ⅱ')+' <span>静谧旅途</span>';toast(paused?'音乐已暂停 · 演示':'继续播放 · 演示');};
+$('#music').onclick=()=>{const b=$('#music');const paused=b.dataset.paused!=='true';b.dataset.paused=String(paused);const icon=paused?'<path d="m8 5 11 7-11 7z"/>':'<path d="M8 5v14M16 5v14"/>';b.innerHTML=`<svg viewBox="0 0 24 24" aria-hidden="true">${icon}</svg><span>静谧旅途</span>`;b.setAttribute('aria-label',paused?'播放音乐 · 演示':'暂停音乐 · 演示');toast(paused?'音乐已暂停 · 演示':'继续播放 · 演示');};
 function toggleMapExpansion(){mapExpanded=!mapExpanded;$('.map').classList.toggle('expanded',mapExpanded);$('#map-expand').textContent=mapExpanded?'收起 ↙':'展开 ↗';requestAnimationFrame(()=>{if(mapEnabled)renderMap();});}
 $('#map-expand').onclick=toggleMapExpansion;
 function focusables(){return detail.open?[$('#close-detail'),...detail.querySelectorAll('button:not(#close-detail)')]:!windowPopover.hidden?[...windowPopover.querySelectorAll('button,input')]:$$('[data-focus]').filter(e=>e.getClientRects().length&&(!mapExpanded||$('.map').contains(e)));}

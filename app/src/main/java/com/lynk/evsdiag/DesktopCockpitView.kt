@@ -107,26 +107,129 @@ internal class DesktopCockpitView(context: Context, private val action:(String)-
         paint.style=Paint.Style.FILL;paint.shader=null;paint.typeface=font;paint.textSize=size;paint.color=color
         c.drawText(value,x,y,paint)
     }
+    private fun fittedText(c:Canvas,value:String,x:Float,y:Float,size:Float,maxWidth:Float,color:Int=textColor) {
+        paint.style=Paint.Style.FILL;paint.shader=null;paint.typeface=font;paint.textSize=size;paint.color=color
+        if (maxWidth <= 0f) return
+        var visible = value
+        while (visible.isNotEmpty() && paint.measureText(visible) > maxWidth) {
+            visible = visible.dropLast(1)
+        }
+        if (visible.length < value.length && visible.isNotEmpty()) {
+            while (visible.isNotEmpty() && paint.measureText("$visible…") > maxWidth) {
+                visible = visible.dropLast(1)
+            }
+            visible = "$visible…"
+        }
+        c.drawText(visible,x,y,paint)
+    }
     private fun round(c:Canvas,r:RectF,color:Int,radius:Float=20f){paint.style=Paint.Style.FILL;paint.shader=null;paint.color=color;c.drawRoundRect(r,radius,radius,paint)}
+    private fun icon(c: Canvas, id: String, x: Float, y: Float, size: Float, color: Int) {
+        paint.style = Paint.Style.STROKE
+        paint.shader = null
+        paint.strokeWidth = max(1.5f, size / 12f)
+        paint.strokeCap = Paint.Cap.ROUND
+        paint.strokeJoin = Paint.Join.ROUND
+        paint.color = color
+        val p = Path()
+        fun point(u: Float, v: Float) = x + size * u to y + size * v
+        fun move(u: Float, v: Float) { point(u, v).let { p.moveTo(it.first, it.second) } }
+        fun line(u: Float, v: Float) { point(u, v).let { p.lineTo(it.first, it.second) } }
+        fun curve(u1: Float, v1: Float, u2: Float, v2: Float, u3: Float, v3: Float) {
+            val a = point(u1, v1); val b = point(u2, v2); val d = point(u3, v3)
+            p.cubicTo(a.first, a.second, b.first, b.second, d.first, d.second)
+        }
+        when (id) {
+            "lights" -> {
+                move(.12f, .55f); curve(.2f, .26f, .46f, .18f, .7f, .34f); line(.7f, .7f); curve(.48f, .86f, .22f, .8f, .12f, .55f)
+                move(.78f, .3f); line(.98f, .22f); move(.8f, .5f); line(1f, .5f); move(.78f, .7f); line(.98f, .78f)
+            }
+            "windows" -> {
+                // A clear side-window silhouette rather than a generic trapezoid.
+                move(.08f, .72f); line(.16f, .48f); curve(.22f, .42f, .29f, .4f, .37f, .4f)
+                line(.48f, .2f); line(.76f, .2f); line(.88f, .45f); line(.94f, .72f); line(.08f, .72f)
+                move(.43f, .27f); line(.37f, .68f); move(.7f, .27f); line(.78f, .68f)
+            }
+            "roof" -> {
+                p.addRoundRect(RectF(x + size*.12f, y + size*.22f, x + size*.88f, y + size*.8f), size*.11f, size*.11f, Path.Direction.CW)
+                move(.16f, .44f); line(.84f, .44f); move(.5f, .25f); line(.5f, .41f)
+                move(.43f, .62f); line(.7f, .62f); line(.62f, .54f); move(.7f, .62f); line(.62f, .7f)
+            }
+            "trunk" -> {
+                // Rear body plus a liftgate shown open, recognizable even at small sizes.
+                move(.14f, .78f); line(.86f, .78f); line(.86f, .56f); line(.73f, .48f); line(.32f, .48f); line(.18f, .57f); line(.14f, .78f)
+                move(.68f, .49f); line(.8f, .14f); line(.92f, .2f); line(.84f, .55f)
+                move(.26f, .64f); line(.74f, .64f)
+            }
+            "amap" -> {
+                move(.08f, .2f); line(.38f, .3f); line(.72f, .18f); line(.92f, .28f); line(.92f, .82f); line(.62f, .7f); line(.3f, .84f); line(.08f, .72f); line(.08f, .2f)
+                move(.38f, .3f); line(.38f, .72f); move(.72f, .18f); line(.72f, .59f)
+            }
+            "routes" -> {
+                move(.18f, .78f); curve(.13f, .58f, .34f, .52f, .42f, .38f); curve(.5f, .22f, .46f, .14f, .65f, .17f); curve(.85f, .2f, .85f, .36f, .68f, .45f)
+                move(.18f, .68f); line(.18f, .78f); line(.28f, .78f); move(.6f, .68f); line(.72f, .8f); line(.84f, .68f); line(.72f, .56f); line(.6f, .68f)
+            }
+            "energy" -> {
+                // Fuel dispenser silhouette; this control opens the fuel/energy screen.
+                move(.28f, .9f); line(.28f, .14f); line(.67f, .14f); line(.67f, .9f); line(.28f, .9f)
+                move(.36f, .24f); line(.59f, .24f); line(.59f, .46f); line(.36f, .46f); line(.36f, .24f)
+                move(.67f, .32f); curve(.9f, .35f, .78f, .58f, .86f, .69f); line(.86f, .83f); curve(.84f, .92f, .68f, .91f, .67f, .82f)
+                move(.2f, .92f); line(.75f, .92f)
+            }
+            "sun" -> {
+                p.addCircle(x + size*.5f, y + size*.5f, size*.23f, Path.Direction.CW)
+                for (i in 0 until 8) {
+                    val angle = i * Math.PI / 4
+                    val inner = point(.5f + cos(angle).toFloat()*.36f, .5f + sin(angle).toFloat()*.36f)
+                    val outer = point(.5f + cos(angle).toFloat()*.48f, .5f + sin(angle).toFloat()*.48f)
+                    p.moveTo(inner.first, inner.second); p.lineTo(outer.first, outer.second)
+                }
+            }
+            "moon" -> {
+                move(.7f, .12f); curve(.28f, .1f, .08f, .42f, .2f, .7f); curve(.33f, .98f, .68f, .88f, .82f, .62f)
+                curve(.58f, .75f, .43f, .58f, .49f, .4f); curve(.52f, .28f, .59f, .18f, .7f, .12f)
+            }
+            "airflow" -> {
+                p.addCircle(x + size*.5f, y + size*.5f, size*.1f, Path.Direction.CW)
+                for (i in 0 until 3) {
+                    val top = .2f + i*.22f
+                    move(.16f, top); curve(.38f, top-.08f, .62f, top+.08f, .84f, top)
+                }
+            }
+            else -> {
+                move(.78f, .5f); line(.22f, .5f); move(.22f, .5f); line(.44f, .28f); move(.22f, .5f); line(.44f, .72f)
+            }
+        }
+        c.drawPath(p, paint)
+        paint.style = Paint.Style.FILL
+    }
     private fun button(c:Canvas,id:String,r:RectF,title:String,small:String?=null,active:Boolean=false) {
         buttons[id]=r
         val base=if(night)Color.argb(210,24,40,57) else Color.argb(227,243,248,248)
         round(c,r,if(pressed==id)Color.argb(230,78,117,139) else base,18f)
+        paint.style=Paint.Style.STROKE;paint.shader=null;paint.strokeWidth=1f
+        paint.color=if(night)Color.argb(42,204,224,237) else Color.argb(72,73,106,111)
+        c.drawRoundRect(r,18f,18f,paint);paint.style=Paint.Style.FILL
         val color=if(active)accent else textColor
-        text(c,title,r.left+22,r.top+42,24f,color)
-        small?.let {text(c,it,r.left+22,r.top+72,17f,muted)}
+        icon(c,id,r.left+19,r.top+22,26f,color)
+        val textX=r.left+59
+        val textWidth=(r.right-textX-14f).coerceAtLeast(0f)
+        fittedText(c,title,textX,r.top+42,24f,textWidth,color)
+        small?.let {fittedText(c,it,textX,r.top+72,17f,textWidth,muted)}
     }
     override fun onDraw(c:Canvas) {
         super.onDraw(c);buttons.clear()
         scale=min(width/1920f,height/896f);ox=(width-1920*scale)/2;oy=(height-896*scale)/2
         c.save();c.translate(ox,oy);c.scale(scale,scale)
-        text(c,"LYNK & CO",44f,43f,24f)
+        round(c,RectF(35f,8f,75f,58f),if(night)Color.argb(155,24,40,57) else Color.argb(190,243,248,248),16f)
+        icon(c,"back",43f,20f,24f,muted)
+        text(c,"LYNK & CO",91f,43f,24f)
         text(c,if(preview)"车辆桌面 · 数据演示" else "车辆桌面 · 只读车况 / 控车演示",245f,43f,18f,muted)
         val clock=clockFormat.format(Date())
         text(c,clock,1750f,43f,28f)
-        buttons["back"]=RectF(35f,8f,215f,58f)
-        buttons["theme"]=RectF(1540f,8f,1715f,58f)
-        text(c,if(night)"日间模式" else "夜间模式",1550f,42f,20f,muted)
+        buttons["back"]=RectF(35f,8f,75f,58f)
+        buttons["theme"]=RectF(1488f,8f,1715f,58f)
+        icon(c,if(night)"sun" else "moon",1495f,18f,26f,muted)
+        text(c,if(night)"日间模式" else "夜间模式",1535f,42f,20f,muted)
         buttons["environment"]=RectF(1625f,70f,1880f,237f)
         text(c,when(weather){DesktopEnvironment.Weather.SNOW->"0°";DesktopEnvironment.Weather.RAIN->"22°";else->"24°"},1660f,153f,78f)
         text(c,weather.label,1760f,203f,25f)
@@ -172,7 +275,8 @@ internal class DesktopCockpitView(context: Context, private val action:(String)-
         text(c,"23.0°",890f,883f,33f)
         text(c,"AUTO",1020f,880f,14f,muted)
         buttons["airflow"]=RectF(1110f,846f,1380f,896f)
-        text(c,"风量",1127f,879f,17f,if(airflowAdjusting)accent else muted)
+        icon(c,"airflow",1118f,858f,24f,if(airflowAdjusting)accent else muted)
+        text(c,"风量",1150f,879f,17f,if(airflowAdjusting)accent else muted)
         text(c,"$airflowLevel/7",1182f,880f,20f)
         for(i in 0 until 7) {
             val bar=RectF(1242f+i*14f,867f,1250f+i*14f,879f)
@@ -217,10 +321,9 @@ internal class DesktopCockpitView(context: Context, private val action:(String)-
     private fun drawTrend(c:Canvas) {
         if(trend.size<2)return
         val points=trend.takeLast(40);val path=Path();val area=Path()
-        points.forEachIndexed {i,p ->
-            val x=48f+i*365f/(points.size-1);val y=605f-(p.value.coerceIn(0f,25f)/25f)*210f
-            if(i==0){path.moveTo(x,y);area.moveTo(x,y)}else{path.lineTo(x,y);area.lineTo(x,y)}
-        }
+        val coords=points.mapIndexed {i,p -> 48f+i*365f/(points.size-1) to 605f-(p.value.coerceIn(0f,25f)/25f)*210f }
+        path.addMonotoneCubicThrough(coords)
+        area.addMonotoneCubicThrough(coords)
         area.lineTo(413f,670f);area.lineTo(48f,670f);area.close()
         paint.shader=LinearGradient(0f,400f,0f,670f,intArrayOf(if(night)Color.argb(65,84,170,210)else Color.argb(45,45,122,147),Color.TRANSPARENT),null,Shader.TileMode.CLAMP)
         paint.style=Paint.Style.FILL;c.drawPath(area,paint);paint.shader=null

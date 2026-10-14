@@ -608,19 +608,15 @@ class OriginalEnergyView @JvmOverloads constructor(
 
         val curvePath = Path()
         val areaPath = Path()
-        points.forEachIndexed { index, point ->
+        val curveCoordinates = points.map { point ->
             val x = chartLeft + (chartRight - chartLeft) * point.first
-            val value = point.second
-            val y = chartBottom - (chartBottom - chartTop) * value / 20f
-            if (index == 0) {
-                curvePath.moveTo(x, y)
-                areaPath.moveTo(x, chartBottom)
-                areaPath.lineTo(x, y)
-            } else {
-                curvePath.lineTo(x, y)
-                areaPath.lineTo(x, y)
-            }
+            val y = chartBottom - (chartBottom - chartTop) * point.second / 20f
+            x to y
         }
+        areaPath.moveTo(curveCoordinates.first().first, chartBottom)
+        areaPath.lineTo(curveCoordinates.first().first, curveCoordinates.first().second)
+        curvePath.addMonotoneCubicThrough(curveCoordinates)
+        areaPath.addMonotoneCubicThrough(curveCoordinates, startNewPath = false)
         areaPath.lineTo(chartRight, chartBottom)
         areaPath.close()
 
